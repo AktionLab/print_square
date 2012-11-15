@@ -1,6 +1,39 @@
 module PrintSquare
   class CommandRunner
     class << self
+      class Position
+        attr_accessor :d, :p, :o, :f, :s
+
+        def initialize(direction, size)
+          @d, @s = direction, size
+          @p = @o = 0
+        end
+
+        def next
+          @p += @d
+          @f.call if bounds?
+        end
+
+        def bounds?
+          @p == (@d == 1 ? (@s - 1) : @o) 
+        end
+      end
+
+      class Printer
+        def initialize(size)
+          @matrix = (1..size).reduce([]) {|matrix,n| matrix + [(1..size).map { nil }]}
+        end
+
+        def set(x, y, n)
+          @matrix[y.p][x.p] = n
+        end
+
+        def out
+          column_sizes = @matrix.first.map(&:to_s).map(&:size)
+          @matrix.each{|r| r.each_with_index{|c,i| print "#{' ' if i > 0}%#{column_sizes[i]}s" % c}; puts}
+        end
+      end
+
       def run(args)
         validate_args(args)
         print_square(args[0].to_i)
@@ -9,48 +42,34 @@ module PrintSquare
       def print_square(number)
         size = Math.sqrt(number).to_i
         m = (1..size).reduce([]) {|matrix,n| matrix + [(1..size).map { nil }]}
-        dx = 1
-        dy = 0
-        px = py = 0
-        ox = oy = 0
         n = number
-        s = size
+        x = Position.new 1, size
+        y = Position.new 0, size
+        print = Printer.new size
+
+        x.f = proc do
+          y.o += 1 if x.d == 1
+          y.d = x.d
+          x.d = 0
+        end
+
+        y.f = proc do
+          if y.d == -1
+            x.s -= 1
+            y.s -= 1
+            x.o += 1
+          end
+          x.d = y.d * -1
+          y.d = 0
+        end
 
         until n == 0
-          m[py][px] = n
-          if dx == 1
-            px += dx
-            if px == (s - 1)
-              dx = 0
-              dy = 1
-              oy += 1
-            end
-          elsif dy == 1
-            py += dy
-            if py == (s - 1)
-              dx = -1
-              dy = 0
-            end
-          elsif dx == -1
-            px += dx
-            if px == ox
-              dx = 0
-              dy = -1
-            end
-          elsif dy == -1
-            py += dy
-            if py == oy
-              dx = 1
-              dy = 0
-              s -= 1
-              ox += 1
-            end
-          end
+          print.set x, y, n
+          y.d == 0 ? x.next : y.next
           n -= 1
         end
 
-        column_sizes = m.first.map(&:to_s).map(&:size)
-        m.each{|r| r.each_with_index{|c,i| print "#{' ' if i > 0}%#{column_sizes[i]}s" % c}; puts}
+        print.out
       end
 
       def is_square?(number)
