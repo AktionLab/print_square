@@ -1,5 +1,8 @@
 require "print_square/version"
+require 'active_support/dependencies/autoload'
 
 module PrintSquare
-  # Your code goes here...
+  extend ActiveSupport::Autoload
+
+  autoload :CommandRunner
 end

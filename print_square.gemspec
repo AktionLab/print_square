@@ -8,12 +8,14 @@ Gem::Specification.new do |gem|
   gem.version       = PrintSquare::VERSION
   gem.authors       = ["Chris Boertien"]
   gem.email         = ["chris@aktionlab.com"]
-  gem.description   = %q{TODO: Write a gem description}
-  gem.summary       = %q{TODO: Write a gem summary}
-  gem.homepage      = ""
+  gem.description   = %q{A simple command that validates a square number and prints it in a design}
+  gem.summary       = %q{Validates squares and prints it in a design}
+  gem.homepage      = "http://aktionlab.com"
 
   gem.files         = `git ls-files`.split($/)
-  gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
+  gem.executables   = ["print_square"]
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ["lib"]
+
+  gem.add_dependency 'activesupport', '~> 3.2.9'
 end
