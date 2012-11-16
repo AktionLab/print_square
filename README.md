@@ -1,24 +1,18 @@
 # PrintSquare
 
-TODO: Write a gem description
+Prints a square of numbers. The command takes a square number and prints out a pattern, starting with 1 in the middle and spiraling outwards counterclockwise.
 
 ## Installation
-
-Add this line to your application's Gemfile:
-
-    gem 'print_square'
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
 
     $ gem install print_square
 
 ## Usage
 
-TODO: Write usage instructions here
+    $ print_square 16
+    16 15 14 13
+     5  4  3 12
+     6  1  2 11
+     7  8  9 10
 
 ## Contributing
 
