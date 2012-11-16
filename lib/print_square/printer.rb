@@ -10,9 +10,16 @@ module PrintSquare
 
     def out
       column_sizes = @matrix.first.map(&:to_s).map(&:size)
-      @matrix.each{|r| r.each_with_index{|c,i| print "#{' ' if i > 0}%#{column_sizes[i]}s" % c}; puts}
+
+      out_rows = []
+      @matrix.each do |row|
+        row.each_with_index do |cell,i|
+          row[i] = cell.to_s.rjust(column_sizes[i])
+        end
+        out_rows << [row.join(' ')]
+      end
+      puts out_rows.join("\n")
     end
   end
-
 end
 
