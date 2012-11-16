@@ -1,49 +1,6 @@
 module PrintSquare
   class CommandRunner
     class << self
-      class Position
-        attr_accessor :direction, :position, :offset, :turn, :size
-
-        def initialize(direction, size, size_offset=1)
-          @direction, @size, @size_offset = direction, size, size_offset
-          @position = size.even? ? 0 : size - 1
-          @offset = 0
-        end
-
-        def next
-          @position += @direction
-          @turn.call if bounds?
-        end
-
-        def bounds?
-          @position == (@direction == 1 ? (@size - @size_offset) : @offset) 
-        end
-
-        def to_s
-          <<-TOS
-D: #{@direction}
-P: #{@position}
-O: #{@offset}
-S: #{@size}
-TOS
-        end
-      end
-
-      class Printer
-        def initialize(size)
-          @matrix = (1..size).reduce([]) {|matrix,n| matrix + [(1..size).map { 0 }]}
-        end
-
-        def set(x, y, n)
-          @matrix[y.position][x.position] = n
-        end
-
-        def out
-          column_sizes = @matrix.first.map(&:to_s).map(&:size)
-          @matrix.each{|r| r.each_with_index{|c,i| print "#{' ' if i > 0}%#{column_sizes[i]}s" % c}; puts}
-        end
-      end
-
       def run(args)
         validate_args(args)
         print_square(args[0].to_i)
@@ -52,9 +9,9 @@ TOS
       def print_square(number)
         size = Math.sqrt(number).to_i
         n = number
-        x = Position.new size.even? ? 1 : -1, size, size.even? ? 1 : 0
-        y = Position.new 0, size
-        print = Printer.new size
+        x = PrintSquare::Vector.new size.even? ? 1 : -1, size, size.even? ? 1 : 0
+        y = PrintSquare::Vector.new 0, size
+        print = PrintSquare::Printer.new size
 
         x.turn = proc do
           y.offset += 1 if x.direction == 1
@@ -81,6 +38,13 @@ TOS
         print.out
       end
 
+      def validate_args(args)
+        usage(:no_args) if args.count == 0
+        usage(:too_many_args) if args.count > 1
+        usage(:invalid_arg) unless (Integer(args[0]) rescue false)
+        usage(:not_square) unless is_square?(args[0].to_i)
+      end
+
       def is_square?(number)
         return true if number == 1
         position = 2
@@ -97,13 +61,6 @@ TOS
           end
         end
         false
-      end
-
-      def validate_args(args)
-        usage(:no_args) if args.count == 0
-        usage(:too_many_args) if args.count > 1
-        usage(:invalid_arg) unless (Integer(args[0]) rescue false)
-        usage(:not_square) unless is_square?(args[0].to_i)
       end
 
       def usage(error_type)

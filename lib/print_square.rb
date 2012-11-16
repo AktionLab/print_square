@@ -5,4 +5,6 @@ module PrintSquare
   extend ActiveSupport::Autoload
 
   autoload :CommandRunner
+  autoload :Printer
+  autoload :Vector
 end
