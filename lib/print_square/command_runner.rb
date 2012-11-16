@@ -2,30 +2,40 @@ module PrintSquare
   class CommandRunner
     class << self
       class Position
-        attr_accessor :d, :p, :o, :f, :s
+        attr_accessor :direction, :position, :offset, :turn, :size
 
-        def initialize(direction, size)
-          @d, @s = direction, size
-          @p = @o = 0
+        def initialize(direction, size, size_offset=1)
+          @direction, @size, @size_offset = direction, size, size_offset
+          @position = size.even? ? 0 : size - 1
+          @offset = 0
         end
 
         def next
-          @p += @d
-          @f.call if bounds?
+          @position += @direction
+          @turn.call if bounds?
         end
 
         def bounds?
-          @p == (@d == 1 ? (@s - 1) : @o) 
+          @position == (@direction == 1 ? (@size - @size_offset) : @offset) 
+        end
+
+        def to_s
+          <<-TOS
+D: #{@direction}
+P: #{@position}
+O: #{@offset}
+S: #{@size}
+TOS
         end
       end
 
       class Printer
         def initialize(size)
-          @matrix = (1..size).reduce([]) {|matrix,n| matrix + [(1..size).map { nil }]}
+          @matrix = (1..size).reduce([]) {|matrix,n| matrix + [(1..size).map { 0 }]}
         end
 
         def set(x, y, n)
-          @matrix[y.p][x.p] = n
+          @matrix[y.position][x.position] = n
         end
 
         def out
@@ -41,31 +51,30 @@ module PrintSquare
 
       def print_square(number)
         size = Math.sqrt(number).to_i
-        m = (1..size).reduce([]) {|matrix,n| matrix + [(1..size).map { nil }]}
         n = number
-        x = Position.new 1, size
+        x = Position.new size.even? ? 1 : -1, size, size.even? ? 1 : 0
         y = Position.new 0, size
         print = Printer.new size
 
-        x.f = proc do
-          y.o += 1 if x.d == 1
-          y.d = x.d
-          x.d = 0
+        x.turn = proc do
+          y.offset += 1 if x.direction == 1
+          y.direction = x.direction
+          x.direction = 0
         end
 
-        y.f = proc do
-          if y.d == -1
-            x.s -= 1
-            y.s -= 1
-            x.o += 1
+        y.turn = proc do
+          if y.direction == -1
+            x.size -= 1
+            y.size -= 1
+            x.offset += 1
           end
-          x.d = y.d * -1
-          y.d = 0
+          x.direction = y.direction * -1
+          y.direction = 0
         end
 
         until n == 0
           print.set x, y, n
-          y.d == 0 ? x.next : y.next
+          y.direction == 0 ? x.next : y.next
           n -= 1
         end
 
